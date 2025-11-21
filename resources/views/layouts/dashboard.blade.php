@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Dashboard</title>
@@ -55,6 +56,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="d-flex">
@@ -62,26 +64,32 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <h4>ADMIN PANEL</h4>
+            <div class="mb-3 p-2 bg-dark rounded text-center">
+                <small class="text-gray">Selamat Datang,</small><br>
+                <strong>{{ Auth::user()->name ?? 'User' }}</strong>
+            </div>
 
-            <a href="{{ url('/dashboard') }}" 
-               class="{{ request()->is('dashboard') ? 'active' : '' }}">
-               📊 Dashboard
+            <a href="{{ url('/dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+                📊 Dashboard
             </a>
 
-            <a href="{{ url('/karyawans') }}"
-               class="{{ request()->is('karyawans*') ? 'active' : '' }}">
-               👥 Data Karyawan
+            <a href="{{ url('/karyawans') }}" class="{{ request()->is('karyawans*') ? 'active' : '' }}">
+                👥 Data Karyawan
             </a>
 
-            <a href="{{ url('/jabatans') }}"
-               class="{{ request()->is('jabatan*') ? 'active' : '' }}">
-               💰 Jabatan
+            <a href="{{ url('/jabatans') }}" class="{{ request()->is('jabatan*') ? 'active' : '' }}">
+                💰 Jabatan
             </a>
 
-            <a href="{{ url('/absensi') }}"
-               class="{{ request()->is('absensi*') ? 'active' : '' }}">
-               📝 Absensi
+            <a href="{{ url('/absensi') }}" class="{{ request()->is('absensi*') ? 'active' : '' }}">
+                📝 Absensi
             </a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100 mt-3">
+                    🚪 Logout
+                </button>
+            </form>
         </div>
 
         <!-- Page Content -->
@@ -93,4 +101,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
