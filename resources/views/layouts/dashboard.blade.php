@@ -73,9 +73,9 @@
                👥 Data Karyawan
             </a>
 
-            <a href="{{ url('/gaji') }}"
-               class="{{ request()->is('gaji*') ? 'active' : '' }}">
-               💰 Gaji
+            <a href="{{ url('/jabatans') }}"
+               class="{{ request()->is('jabatan*') ? 'active' : '' }}">
+               💰 Jabatan
             </a>
 
             <a href="{{ url('/absensi') }}"

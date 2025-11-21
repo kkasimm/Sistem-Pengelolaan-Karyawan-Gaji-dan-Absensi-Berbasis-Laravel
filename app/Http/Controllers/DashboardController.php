@@ -4,31 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Models\Absensi;
-use Illuminate\Http\Request;
+use App\Models\Jabatan;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Pastikan model names benar (StudlyCase)
+        // Total Karyawan
         $totalKaryawan = Karyawan::count();
-        $totalAbsensi = Absensi::count();
-        $totalHadir = Absensi::where('status', 'hadir')->count();
-        $gajiTerbesar = Karyawan::max('gaji_pokok');
-
-        // Ambil 7 hari terakhir (jika tidak ada hari tertentu, akan ambil data yang ada)
+        
+        // Total Hadir Hari Ini
+        $totalHadir = Absensi::whereDate('tanggal', Carbon::today())
+                            ->where('kategori_kehadiran_id', 1) // ID 1 = Hadir
+                            ->count();
+        
+        // Gaji Terbesar
+        $gajiTerbesar = Jabatan::max('gaji');
+        
+        // Data Absensi 7 Hari Terakhir
         $absensi7Hari = Absensi::selectRaw('DATE(tanggal) as tgl, COUNT(*) as jumlah')
-            ->where('status', 'hadir')
-            ->where('tanggal', '>=', now()->subDays(6)->startOfDay())
-            ->groupBy('tgl')
-            ->orderBy('tgl', 'ASC')
-            ->get();
-
+                            ->where('tanggal', '>=', Carbon::now()->subDays(7))
+                            ->where('kategori_kehadiran_id', 1)
+                            ->groupBy('tgl')
+                            ->orderBy('tgl', 'asc')
+                            ->get();
+        
         return view('dashboard.index', compact(
-            'totalKaryawan',
-            'totalAbsensi',
-            'totalHadir',
-            'gajiTerbesar',
+            'totalKaryawan', 
+            'totalHadir', 
+            'gajiTerbesar', 
             'absensi7Hari'
         ));
     }

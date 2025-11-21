@@ -4,78 +4,53 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\Karyawan;
+use App\Models\KategoriKehadiran;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AbsensiController extends Controller
 {
-
+    // Tampilkan semua absensi
     public function index()
     {
-        $absensi = Absensi::with('karyawan')->get();
-        return view('absensi.index', compact('absensi'));
+        $absensis = Absensi::with(['karyawan', 'kategoriKehadiran'])->latest()->get();
+        return view('absensi.index', compact('absensis'));
     }
 
+    // Form absen masuk
     public function create()
     {
-        $karyawan = Karyawan::all();
-        return view('absensi.create', compact('karyawan'));
+        $karyawans = Karyawan::all();
+        $kategoris = KategoriKehadiran::all();
+        return view('absensi.create', compact('karyawans', 'kategoris'));
     }
 
+    // Simpan absen masuk
     public function store(Request $request)
     {
         $request->validate([
-            'karyawan_id' => 'required',
-            'tanggal' => 'required|date',
-            'jam_masuk' => 'nullable',
-            'jam_keluar' => 'nullable',
-            'status' => 'required'
+            'karyawan_id' => 'required|exists:karyawans,id_karyawan',
+            'kategori_kehadiran_id' => 'required|exists:kategori_kehadirans,id_kategori',
         ]);
 
         Absensi::create([
             'karyawan_id' => $request->karyawan_id,
-            'tanggal' => $request->tanggal,
-            'jam_masuk' => $request->jam_masuk,
-            'jam_keluar' => $request->jam_keluar,
-            'status' => $request->status
+            'tanggal' => Carbon::now()->format('Y-m-d'),
+            'jam_masuk' => Carbon::now()->format('H:i:s'),
+            'kategori_kehadiran_id' => $request->kategori_kehadiran_id,
         ]);
 
-        return redirect()->route('absensi.index')->with('success', 'Absensi berhasil ditambahkan!');
+        return redirect()->route('absensi.index')->with('success', 'Absen masuk berhasil!');
     }
 
-    public function edit($id)
+    // Update jam keluar
+    public function updateJamKeluar($id)
     {
         $absensi = Absensi::findOrFail($id);
-        $karyawan = Karyawan::all();
-
-        return view('absensi.edit', compact('absensi', 'karyawan'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'karyawan_id' => 'required',
-            'tanggal' => 'required|date',
-            'jam_masuk' => 'nullable',
-            'jam_keluar' => 'nullable',
-            'status' => 'required'
-        ]);
-
-        $absensi = Absensi::findOrFail($id);
-
         $absensi->update([
-            'karyawan_id' => $request->karyawan_id,
-            'tanggal' => $request->tanggal,
-            'jam_masuk' => $request->jam_masuk,
-            'jam_keluar' => $request->jam_keluar,
-            'status' => $request->status
+            'jam_keluar' => Carbon::now()->format('H:i:s')
         ]);
 
-        return redirect()->route('absensi.index')->with('success', 'Absensi berhasil diupdate!');
-    }
-
-    public function destroy($id)
-    {
-        Absensi::destroy($id);
-        return redirect()->route('absensi.index')->with('success', 'Absensi berhasil dihapus!');
+        return redirect()->back()->with('success', 'Absen keluar berhasil!');
     }
 }

@@ -2,56 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\karyawan;
+use App\Models\Karyawan;
+use App\Models\Jabatan;
 use Illuminate\Http\Request;
 
 class KaryawanController extends Controller
 {
     public function index()
     {
-        $karyawan = Karyawan::all();
-        return view('karyawans.index', compact('karyawan'));
+        $karyawans = Karyawan::with('jabatan')->get();
+        return view('karyawans.index', compact('karyawans'));
     }
 
     public function create()
     {
-        return view('karyawans.create');
+        $jabatans = Jabatan::all();
+        return view('karyawans.create', compact('jabatans'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required',
-            'jabatan' => 'required',
-            'email' => 'required|email|unique:karyawans',
-            'no_hp' => 'required',
-            'gaji_pokok' => 'required|numeric',
+            'nama_karyawan' => 'required|string|max:255',
+            'jabatan_id' => 'required|exists:jabatans,id_jabatan',
+            'email' => 'required|email|unique:karyawans,email',
+            'no_hp' => 'required|string|max:15',
         ]);
 
         Karyawan::create($request->all());
-
-        return redirect()->route('karyawans.index')
-            ->with('success', 'Karyawan berhasil ditambahkan!');
+        return redirect()->route('karyawans.index')->with('success', 'Karyawan berhasil ditambahkan!');
     }
 
-    public function edit(Karyawan $karyawan)
+    public function edit($id)
     {
-        return view('karyawans.edit', compact('karyawan'));
+        $karyawan = Karyawan::findOrFail($id);
+        $jabatans = Jabatan::all();
+        return view('karyawans.edit', compact('karyawan', 'jabatans'));
     }
 
-    public function update(Request $request, Karyawan $karyawan)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'nama_karyawan' => 'required|string|max:255',
+            'jabatan_id' => 'required|exists:jabatans,id_jabatan',
+            'email' => 'required|email|unique:karyawans,email,' . $id . ',id_karyawan',
+            'no_hp' => 'required|string|max:15',
+        ]);
+
+        $karyawan = Karyawan::findOrFail($id);
         $karyawan->update($request->all());
-
-        return redirect()->route('karyawans.index')
-            ->with('success', 'Data berhasil diupdate!');
+        return redirect()->route('karyawans.index')->with('success', 'Karyawan berhasil diupdate!');
     }
 
-    public function destroy(Karyawan $karyawan)
+    public function destroy($id)
     {
+        $karyawan = Karyawan::findOrFail($id);
         $karyawan->delete();
-
-        return redirect()->route('karyawans.index')
-            ->with('success', 'Data berhasil dihapus!');
+        return redirect()->route('karyawans.index')->with('success', 'Karyawan berhasil dihapus!');
     }
 }
